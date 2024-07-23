@@ -1,0 +1,137 @@
+from pymongo import MongoClient
+
+def insert_employee(emp_id, name, dept, salary):
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['company']
+    collection = db['Employee']
+    employee = {
+        'EmpID': emp_id,
+        'Name': name,
+        'Dept': dept,
+        'Salary': salary
+    }
+    collection.insert_one(employee)
+    client.close()
+
+insert_employee(1, 'Ajith', 'SE', 223)
+
+
+
+def display_high_earning_employees():
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['company']
+    collection = db['Employee']
+    employees = collection.find({'Salary': {'$gt': 25000}})
+    for employee in employees:
+        print(employee)
+    client.close()
+
+display_high_earning_employees()
+
+
+def display_specific_employees():
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['company']
+    collection = db['Employee']
+    employees = collection.find({'$or': [{'Name': {'$regex': '^d', '$options': 'i'}}, {'Dept': {'$regex': 'A', '$options': 'i'}}]})
+    for employee in employees:
+        print(employee)
+    client.close()
+
+display_specific_employees()
+
+
+def update_dept():
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['company']
+    collection = db['Employee']
+    collection.update_one({'Name': 'John'}, {'$set': {'Dept': 'DNA'}})
+    client.close()
+
+update_dept()
+
+
+def delete_employee():
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['company']
+    collection = db['Employee']
+    collection.delete_one({'Name': 'Robert'})
+    client.close()
+
+delete_employee()
+
+
+def menu():
+    print("1. Add a new employee")
+    print("2. Update salary of an employee")
+    print("3. Remove an employee")
+    print("4. Display an employee")
+    print("5. Display all employees")
+    choice = input("Enter your choice: ")
+    return choice
+
+def add_employee():
+    emp_id = int(input("Enter EmpID: "))
+    name = input("Enter Name: ")
+    dept = input("Enter Dept: ")
+    salary = int(input("Enter Salary: "))
+    insert_employee(emp_id, name, dept, salary)
+
+def update_salary():
+    emp_id = int(input("Enter EmpID of the employee to update: "))
+    salary = int(input("Enter new Salary: "))
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['company']
+    collection = db['Employee']
+    collection.update_one({'EmpID': emp_id}, {'$set': {'Salary': salary}})
+    client.close()
+
+def remove_employee():
+    emp_id = int(input("Enter EmpID of the employee to remove: "))
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['company']
+    collection = db['Employee']
+    collection.delete_one({'EmpID': emp_id})
+    client.close()
+
+def display_employee():
+    emp_id = int(input("Enter EmpID of the employee to display: "))
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['company']
+    collection = db['Employee']
+    employee = collection.find_one({'EmpID': emp_id})
+    if employee:
+        print(employee)
+    else:
+        print("Employee not found.")
+    client.close()
+
+def display_all_employees():
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['company']
+    collection = db['Employee']
+    employees = collection.find()
+    for employee in employees:
+        print(employee)
+    client.close()
+
+def main():
+    while True:
+        choice = menu()
+        if choice == '1':
+            add_employee()
+        elif choice == '2':
+            update_salary()
+        elif choice == '3':
+            remove_employee()
+        elif choice == '4':
+            display_employee()
+        elif choice == '5':
+            display_all_employees()
+        else:
+            print("Invalid choice. Displaying all employees.")
+            display_all_employees()
+
+if __name__ == "__main__":
+    main()
+
